@@ -39,11 +39,11 @@ public class OrderRepository {
     }
 
     public Order findOrderById(String orderId){
-        return orderMap.get(orderId);
+        return orderMap.getOrDefault(orderId,null);
     }
 
     public DeliveryPartner findPartnerById(String partnerId){
-        return partnerMap.get(partnerId);
+        return partnerMap.getOrDefault(partnerId,null);
     }
 
     public Integer findOrderCountByPartnerId(String partnerId){
@@ -65,13 +65,13 @@ public class OrderRepository {
     }
 
     public void deletePartner(String partnerId){
-        if (partnerMap.containsKey(partnerId)) {
+        if (partnerToOrderMap.containsKey(partnerId)) {
             for (String orderId : partnerToOrderMap.get(partnerId)) {
                 orderToPartnerMap.remove(orderId);
             }
             partnerToOrderMap.remove(partnerId);
-            partnerMap.remove(partnerId);
         }
+        partnerMap.remove(partnerId);
     }
 
     public void deleteOrder(String orderId){
@@ -88,7 +88,13 @@ public class OrderRepository {
     }
 
     public Integer findCountOfUnassignedOrders(){
-        return (int) orderMap.keySet().stream().filter(orderId -> !orderToPartnerMap.containsKey(orderId)).count();
+        int unassignedOrders = 0;
+        for (String orderId : orderMap.keySet()) {
+            if (!orderToPartnerMap.containsKey(orderId)) {
+                unassignedOrders++;
+            }
+        }
+        return unassignedOrders;
 
     }
 
